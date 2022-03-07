@@ -1,0 +1,113 @@
+<template>
+	<div id="components-layout-demo-basic">
+		<a-layout>
+			<a-layout-header>代办事项</a-layout-header>
+			<a-layout-content>
+				<a-input-search
+					v-model:value="todo"
+					placeholder="请输入待办事项"
+					size="large"
+					@search="addTodo"
+				>
+					<template v-slot:enterButton>
+						<a-button>新增</a-button>
+					</template>
+				</a-input-search>
+				<h2 class="title">待办事项</h2>
+				<a-card :title="`${index+1} · ${item.time}`" v-for="(item,index) in todos" :key="item.id">
+					<template v-slot:extra>
+						<a-switch v-model:checked="item.done" @change="handleCheck(item, true)"></a-switch>
+					</template>
+					{{item.content}}
+				</a-card>
+				<h2 class="title">已办事项</h2>
+				<a-card :title="`${index+1} · ${item.time}`" v-for="(item,index) in dones" :key="item.id">
+					<template v-slot:extra>
+						<a-switch v-model:checked="item.done" @change="handleCheck(item, false)"></a-switch>
+					</template>
+					{{item.content}}
+				</a-card>
+			</a-layout-content>
+		</a-layout>
+	</div>
+</template>
+
+<script>
+	import { ref, reactive, computed } from 'vue'
+	export default {
+		setup() {
+			const todo = ref('')
+			const time = `${new Date().getFullYear()} - ${new Date().getMonth()} - ${new Date().getDate()}`
+			
+			const state = reactive({
+				todoList: [
+					{
+						id: 1,
+						done: false,
+						time: time,
+						content: '搭建一个Vue3demo'
+					},{
+						id: 2,
+						done: false,
+						time: time,
+						content: '看Vue3文档'
+					},{
+						id: 3,
+						done: false,
+						time: time,
+						content: '看Vue3源码'
+					}
+				]
+			})
+			
+			const addTodo = (value) => {
+				if(!value) {
+					message.error('请输入待办事项')
+					return
+				}
+				state.todoList.push({
+					content: value,
+					done: false,
+					time: time,
+					id: Date.now()
+				})
+				todo.value = ''
+			}
+			const todos = computed(() => {
+				return state.todoList.filter(item => !item.done)
+			})
+			const handleCheck = (item, status) => {
+				item.done = status
+			}
+			const dones = computed(() => {
+				return state.todoList.filter(item => item.done)
+			})
+			return {
+				todo,
+				todos,
+				addTodo,
+				handleCheck,
+				dones
+			}
+		}
+	}
+</script>
+
+<style scoped>
+	#components-layout-demo-basic {
+		min-height: 100vh;
+		max-width: 40%;
+		margin: 0 auto;
+		background-color: #ededed;
+	}
+	#components-layout-demo-basic .ant-layout-header,
+	#components-layout-demo-basic .ant-layout-footer {
+		background: #7dbcea;
+		text-align: center;
+		color: #fff;
+	}
+  .title {
+	margin: 0;
+	padding: 10px;
+  }
+</style>
